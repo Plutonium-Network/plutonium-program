@@ -1,45 +1,16 @@
-// Copyright (c) 2021 Plutonium Network
+#![deny(missing_docs)]
 
-pub mod sol_cancel;
-pub mod sol_initialize;
-pub mod sol_withdraw;
-pub mod tok_initialize;
-pub mod utils;
+//! A lending program for the Solana blockchain.
 
-use solana_program::{
-    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, msg,
-    program_error::ProgramError, pubkey::Pubkey,
-};
+pub mod entrypoint;
+pub mod error;
+pub mod instruction;
+pub mod math;
+pub mod processor;
+pub mod pyth;
+pub mod state;
 
-use sol_cancel::sol_cancel_stream;
-use sol_initialize::sol_initialize_stream;
-use sol_withdraw::sol_withdraw_unlocked;
-use tok_initialize::tok_initialize_stream;
+// Export current sdk types for downstream users building with a different sdk version
+pub use solana_program;
 
-entrypoint!(process_instruction);
-/// The program entrypoint
-pub fn process_instruction(
-    program_id: &Pubkey,
-    accounts: &[AccountInfo],
-    instruction_data: &[u8],
-) -> ProgramResult {
-    msg!(
-      PlutoniumNetwork  " v{}.{}.{}",
-        env!("CARGO_PKG_VERSION_MAJOR"),
-        env!("CARGO_PKG_VERSION_MINOR"),
-        env!("CARGO_PKG_VERSION_PATCH")
-    );
-
-    match instruction_data[0] {
-        // These are for native SOL
-        0 => sol_initialize_stream(program_id, accounts, instruction_data),
-        1 => sol_withdraw_unlocked(program_id, accounts, instruction_data),
-        2 => sol_cancel_stream(program_id, accounts, instruction_data),
-        // These are for SPL tokens
-        3 => tok_initialize_stream(program_id, accounts, instruction_data),
-        // 4 => tok_withdraw_unlocked(program_id, accounts, instruction_data),
-        // 5 => tok_cancel_stream(program_id, accounts, instruction_data),
-        // Invalid
-        _ => Err(ProgramError::InvalidArgument),
-    }
-}
+solana_program::declare_id!("6TvznH3B2e3p2mbhufNBpgSrLx6UkgvxtVQvopEZ2kuH");
